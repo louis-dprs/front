@@ -1,0 +1,55 @@
+import type { Class } from "~/types/class";
+
+export const mockClasses: Class[] = [
+  {
+    id: "1",
+    stats: {
+      strength: 15,
+      stamina: 18,
+      intelligence: 6,
+      agility: 8,
+      hp: 120,
+    },
+    iconKey: "/resources/bestiary/character/shaman.png",
+    version: 1,
+    publishedAt: "2025-10-01T08:00:00.000Z",
+    locale: "en",
+    name: "Warrior",
+    shortDesc: "A heavily armored fighter with unmatched endurance.",
+    lore: "The Warriors of the northern clans are trained from childhood to wield heavy weapons and stand as the first line of defense against the darkness.",
+  },
+  {
+    id: "2",
+    stats: {
+      strength: 8,
+      stamina: 10,
+      intelligence: 14,
+      agility: 12,
+      hp: 90,
+    },
+    iconKey: "/resources/bestiary/character/warrior.png",
+    version: 1,
+    publishedAt: "2025-10-01T08:10:00.000Z",
+    locale: "en",
+    name: "Mage",
+    shortDesc: "A master of arcane arts, fragile but powerful.",
+    lore: "Mages spend decades studying forbidden tomes, bending fire, frost, and lightning to their will to strike fear into their enemies.",
+  },
+  {
+    id: "3",
+    stats: {
+      strength: 10,
+      stamina: 12,
+      intelligence: 10,
+      agility: 14,
+      hp: 100,
+    },
+    iconKey: "/resources/bestiary/character/wizard.png",
+    version: 1,
+    publishedAt: "2025-10-01T08:20:00.000Z",
+    locale: "en",
+    name: "Rogue",
+    shortDesc: "Swift and cunning, striking from the shadows.",
+    lore: "Rogues thrive in the darkness of the cursed castle, relying on speed and precision to eliminate their foes before vanishing again.",
+  },
+];
