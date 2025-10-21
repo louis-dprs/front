@@ -1,0 +1,8 @@
+services:
+  nuxt:
+#    image: front-2:latest
+    image: front-2:okay2
+    container_name: nuxt-app
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
