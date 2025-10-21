@@ -27,7 +27,7 @@ export default defineEventHandler(async (event) => {
   }
 
   // For all other routes, check if user is authenticated
-  const session = await getUserSession(event);
+  const session = await useOidcSession(event);
 
   if (!session.user) {
     // Redirect to home page if not authenticated
