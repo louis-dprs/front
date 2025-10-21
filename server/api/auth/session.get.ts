@@ -2,7 +2,9 @@ import { getSession } from "../../utils/token-store";
 
 export default defineEventHandler(async (event) => {
   const session = await getUserSession(event);
-  const sessionId = session?.sid as string | undefined;
+  
+  // nuxt-auth-utils renomme automatiquement 'sid' en 'id'
+  const sessionId = (session?.sid || session?.id) as string | undefined;
   
   if (!sessionId) {
     return {
