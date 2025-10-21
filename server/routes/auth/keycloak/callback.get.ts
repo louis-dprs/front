@@ -50,6 +50,11 @@ export default defineEventHandler(async (event) => {
     const session = await useSession(event, {
       password: config.sessionPassword,
       name: "s",
+      cookie: {
+        secure: false, // Pas de Secure pour développement HTTP
+        httpOnly: true,
+        sameSite: "lax",
+      },
     });
 
     await session.update({

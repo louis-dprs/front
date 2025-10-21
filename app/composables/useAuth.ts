@@ -30,7 +30,7 @@ export const useAuth = () => {
 
   // Login redirect
   const login = () => {
-    navigateTo("/dev/auth/login");
+    navigateTo("auth/login"); // Chemin relatif, fonctionne avec le baseURL
   };
 
   // Logout
