@@ -9,6 +9,7 @@ export default defineNuxtConfig({
     "shadcn-nuxt",
     "@nuxt/image",
     "nuxt-auth-utils",
+    '@nuxtjs/keycloak',
   ],
 
   // Application settings
@@ -60,6 +61,17 @@ export default defineNuxtConfig({
     },
   },
   
+    keycloak: {
+    clientId: 'dungeoncrawler',
+    realm:    'dungeoncrawler',
+    url:      'http://10.4.30.2:8040/keycloak',
+    cookie: {
+      secure: false,      // désactive le flag Secure
+      httpOnly: true,     // recommandé pour limiter l’accès JavaScript
+      sameSite: 'Lax',    // selon vos besoins
+      path: '/'           // scope du cookie
+    }
+  },
   // Si vous utilisez nuxt-auth / sidebase
   auth: {
     globalAppMiddleware: true,
