@@ -9,8 +9,30 @@ export default defineNuxtConfig({
     "shadcn-nuxt",
     "@nuxt/image",
     "nuxt-auth-utils",
-    '@nuxtjs/keycloak',
   ],
+
+  export default defineNuxtConfig({
+    modules: ['@sidebase/nuxt-auth'],
+    auth: {
+      strategies: {
+        keycloak: {
+          scheme: 'oauth',
+          endpoints: {
+            authorization: 'http://10.4.30.2:8040/keycloak/auth/realms/dungeoncrawler/protocol/openid-connect/auth',
+            token:         'http://10.4.30.2:8040/keycloak/auth/realms/dungeoncrawler/protocol/openid-connect/token',
+            userInfo:      'http://10.4.30.2:8040/keycloak/auth/realms/dungeoncrawler/protocol/openid-connect/userinfo',
+          },
+          clientId:   'dungeoncrawler',
+          scope:      ['openid', 'profile', 'email'],
+          redirectUri: 'http://10.4.30.2:8888/dev/auth/keycloak',
+          cookie: {
+            secure: false,
+            sameSite: 'lax',
+          },
+        },
+      },
+    },
+  })
 
   // Application settings
   app: {
@@ -61,17 +83,6 @@ export default defineNuxtConfig({
     },
   },
   
-    keycloak: {
-    clientId: 'dungeoncrawler',
-    realm:    'dungeoncrawler',
-    url:      'http://10.4.30.2:8040/keycloak',
-    cookie: {
-      secure: false,      // désactive le flag Secure
-      httpOnly: true,     // recommandé pour limiter l’accès JavaScript
-      sameSite: 'Lax',    // selon vos besoins
-      path: '/'           // scope du cookie
-    }
-  },
   // Si vous utilisez nuxt-auth / sidebase
   auth: {
     globalAppMiddleware: true,
