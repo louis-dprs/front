@@ -1,34 +1,31 @@
-import type { User } from "~/types/auth";
-
+// Simple wrapper around useUserSession with API fallback
 export const useAuth = () => {
-  const user = useState<User | null>("auth:user", () => null);
-  const loggedIn = computed(() => !!user.value);
-  const loading = useState<boolean>("auth:loading", () => false);
+  const { loggedIn, user, fetch, clear } = useUserSession();
 
-  const fetch = async () => {
-    loading.value = true;
-    try {
-      const data = await $fetch<{ user: User | null; loggedInAt: number | null }>(
-        "/api/auth/session"
-      );
-      user.value = data.user;
-    } catch (error) {
-      console.error("Failed to fetch session:", error);
-      user.value = null;
-    } finally {
-      loading.value = false;
+  // Extend fetch to also call API if needed
+  const fetchWithFallback = async () => {
+    await fetch();
+    
+    // If session exists, fetch full user data from API
+    if (loggedIn.value) {
+      try {
+        const data = await $fetch<{ user: any; loggedInAt: number | null }>(
+          "/api/auth/session"
+        );
+        // Update user state with API data
+        if (data.user) {
+          Object.assign(user.value, data.user);
+        }
+      } catch (error) {
+        console.error("Failed to fetch user details:", error);
+      }
     }
   };
 
-  const clear = () => {
-    user.value = null;
-  };
-
   return {
-    user: readonly(user),
-    loggedIn: readonly(loggedIn),
-    loading: readonly(loading),
-    fetch,
+    user,
+    loggedIn,
+    fetch: fetchWithFallback,
     clear,
   };
 };

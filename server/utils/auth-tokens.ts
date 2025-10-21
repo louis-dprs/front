@@ -1,23 +1,17 @@
 import type { H3Event } from "h3";
 import type { UserSession } from "#auth-utils";
-import { getTokens } from "./token-store";
 
 export function getSessionTokens(session: UserSession) {
-  // nuxt-auth-utils renomme 'sid' en 'id'
-  const sessionId = (session?.sid || session?.id) as string | undefined;
-  if (!sessionId) {
-    return {
-      accessToken: undefined,
-      refreshToken: undefined,
-      expiresAt: undefined,
-    };
-  }
-
-  const tokens = getTokens(sessionId);
+  const secure = session?.secure as { 
+    accessToken?: string; 
+    refreshToken?: string; 
+    expiresAt?: number 
+  } | undefined;
+  
   return {
-    accessToken: tokens?.accessToken,
-    refreshToken: tokens?.refreshToken,
-    expiresAt: tokens?.expiresAt,
+    accessToken: secure?.accessToken,
+    refreshToken: secure?.refreshToken,
+    expiresAt: secure?.expiresAt,
   };
 }
 
@@ -80,16 +74,15 @@ export async function ensureValidAccessToken(event: H3Event) {
     const newExpiresAt =
       response.expires_in > 0 ? now + response.expires_in * 1000 : undefined;
 
-    // Update tokens in server-side store
-    const sessionId = (session?.sid || session?.id) as string | undefined;
-    if (sessionId) {
-      const { updateTokens } = await import("./token-store");
-      updateTokens(sessionId, {
+    // Update session with new tokens
+    await setUserSession(event, {
+      ...session,
+      secure: {
         accessToken: response.access_token,
         refreshToken: response.refresh_token,
         expiresAt: newExpiresAt,
-      });
-    }
+      },
+    });
 
     return response.access_token;
   } catch {

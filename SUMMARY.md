@@ -1,23 +1,21 @@
-# 📝 Résumé des modifications
+# 📝 Résumé des modifications - Solution Native
 
-## Fichiers conservés (fonctionnels)
+## Fichiers modifiés
 
 ### ✅ Configuration
-- **`nuxt.config.ts`** - Session config avec cookie non-secure
-- **`server/middleware/force-insecure-cookies.ts`** - Force les cookies non-secure
+- **`nuxt.config.ts`** - Session config optimisée (maxSize: 8192, secure: false)
+- **`server/middleware/force-insecure-cookies.ts`** - Force cookies non-secure en HTTP
 
-### ✅ Stockage serveur
-- **`server/utils/token-store.ts`** - Store en mémoire pour sessions complètes
-- **`server/utils/auth-tokens.ts`** - Gestion des tokens (récupération + refresh)
+### ✅ Authentification Keycloak (native)
+- **`server/routes/auth/keycloak.get.ts`** - Callback OAuth simplifié (utilise session native)
+- **`server/routes/auth/logout.get.ts`** - Logout simple
+- **`server/api/auth/session.get.ts`** - Endpoint API pour récupérer la session
+- **`server/utils/auth-tokens.ts`** - Gestion tokens avec session.secure
 
-### ✅ Routes d'authentification
-- **`server/routes/auth/keycloak.get.ts`** - Callback OAuth avec stockage serveur
-- **`server/routes/auth/logout.get.ts`** - Logout avec nettoyage du store
-- **`server/api/auth/session.get.ts`** - Récupération des infos utilisateur
-- **`server/api/auth/tokens.get.ts`** - Debug des tokens
-
-### ✅ Types
-- **`app/types/auth.ts`** - Interfaces User, UserSession avec `sid`
+### ✅ Frontend
+- **`app/composables/useAuth.ts`** - Wrapper autour de useUserSession
+- **`app/pages/index.vue`** - Utilise useAuth()
+- **`app/types/auth.ts`** - Types User + UserSession
 
 ## Fichiers supprimés (inutiles)
 
@@ -58,9 +56,22 @@ export async function getSession(sessionId: string) {
 - ✅ Tokens et user stockés côté serveur
 - ✅ Refresh automatique des tokens
 
-## 🐛 Problème actuel
+## 🎯 Architecture simplifiée
 
-Cookie non-secure ✅ mais connexion ne fonctionne pas encore → Vérifier que :
-1. Le sessionId est bien récupéré avec `session?.sid || session?.id`
-2. Les données sont bien stockées dans le store
-3. Redémarrer le serveur après les changements
+```
+Frontend
+  ↓ useAuth() → useUserSession()
+  ↓
+Session Cookie (389 bytes, Iron-sealed)
+  {
+    user: { id, email, name, username },
+    loggedInAt: timestamp,
+    secure: { accessToken, refreshToken, expiresAt }
+  }
+```
+
+**Avantages :**
+- ✅ **100% natif** nuxt-auth-utils
+- ✅ Pas de store custom à maintenir
+- ✅ Gestion automatique par le framework
+- ✅ Simple et maintenable

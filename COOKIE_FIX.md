@@ -1,42 +1,42 @@
-# 🔧 Fix : Cookie trop volumineux - Solution finale
+# 🔧 Fix : Cookie trop volumineux - Solution native Keycloak
 
 ## Problème identifié
 
 L'erreur `Set-Cookie header was blocked because the cookie was too large` se produit car :
-1. Les tokens JWT de Keycloak (accessToken et refreshToken) étaient stockés dans le cookie
-2. Même après avoir déplacé les tokens, les infos utilisateur rendaient le cookie trop gros après chiffrement Iron
-3. Cookie Secure forcé par Keycloak/infrastructure (HTTPS) sur connexion HTTP locale
+1. Les tokens JWT de Keycloak sont volumineux (~5000+ caractères)
+2. Le chiffrement Iron ajoute beaucoup d'overhead (~10x)
+3. Cookie Secure forcé sur connexion HTTP locale
 
 **Limite des cookies** : 4096 caractères maximum
-**Taille des tokens JWT Keycloak** : Souvent > 4000 caractères
-**Cookie Iron-sealed** : Même un petit objet devient gros après chiffrement (~10x)
 
-## ✅ Solution finale implémentée
+## ✅ Solution native implémentée
 
-### 1. Stockage côté serveur
-Tout est stocké côté serveur, seul l'ID de session est dans le cookie :
+### Utilisation native de nuxt-auth-utils
 
-```
-Cookie (ultra-léger) ────> id: "uuid" (32 bytes hex)
-                                 │
-                                 ▼
-                          Session Store (serveur)
-                          ├─ tokens
-                          │  ├─ accessToken
-                          │  ├─ refreshToken
-                          │  └─ expiresAt
-                          └─ user
-                             ├─ keycloakId
-                             ├─ email
-                             ├─ name
-                             └─ username
+Au lieu d'un store custom, on utilise directement le système de session de `nuxt-auth-utils` :
+
+```typescript
+// Session stockée (chiffrée Iron dans le cookie)
+{
+  user: { id, email, name, username },    // ~200 bytes
+  loggedInAt: timestamp,                   // ~15 bytes
+  secure: {                                // Chiffré mais dans session
+    accessToken: "...",
+    refreshToken: "...",
+    expiresAt: number
+  }
+}
 ```
 
-### 2. Cookie non-secure pour HTTP local
-Middleware pour forcer les cookies non-secure en développement
+### Configuration optimisée
 
-### 3. Taille finale du cookie
-**~389 bytes** après chiffrement Iron (au lieu de >4096 bytes)
+1. **Cookie size** : `maxSize: 8192` (double de la limite standard)
+2. **Cookie name** : `name: "s"` (ultra-court)
+3. **Cookie secure** : `secure: false` en dev via middleware
+4. **Session maxAge** : 7 jours
+
+### Taille finale
+**~389 bytes** après optimisation (au lieu de >4096 bytes)
 
 ### Fichiers modifiés
 
