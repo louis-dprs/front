@@ -27,19 +27,17 @@ export default defineNuxtConfig({
   // Runtime configuration
   runtimeConfig: {
     oidc: {
+      defaultProvider: "keycloak",
       providers: {
         keycloak: {
-          baseUrl: process.env.NUXT_OAUTH_KEYCLOAK_SERVER_URL,
           clientId: process.env.NUXT_OAUTH_KEYCLOAK_CLIENT_ID,
           clientSecret: process.env.NUXT_OAUTH_KEYCLOAK_CLIENT_SECRET,
+          authorizationUrl: `${process.env.NUXT_OAUTH_KEYCLOAK_SERVER_URL}/realms/${process.env.NUXT_OAUTH_KEYCLOAK_REALM}/protocol/openid-connect/auth`,
+          tokenUrl: `${process.env.NUXT_OAUTH_KEYCLOAK_SERVER_URL}/realms/${process.env.NUXT_OAUTH_KEYCLOAK_REALM}/protocol/openid-connect/token`,
+          userinfoUrl: `${process.env.NUXT_OAUTH_KEYCLOAK_SERVER_URL}/realms/${process.env.NUXT_OAUTH_KEYCLOAK_REALM}/protocol/openid-connect/userinfo`,
           redirectUri: process.env.NUXT_OAUTH_KEYCLOAK_REDIRECT_URL || "http://localhost:3000/auth/keycloak/callback",
           scope: ["openid", "profile", "email"],
-          realm: process.env.NUXT_OAUTH_KEYCLOAK_REALM,
         },
-      },
-      session: {
-        expirationCheck: true,
-        automaticRefresh: true,
       },
     },
     public: {
