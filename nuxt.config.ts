@@ -26,22 +26,28 @@ export default defineNuxtConfig({
 
   // Runtime configuration
   runtimeConfig: {
-    oidc: {
-      defaultProvider: "keycloak",
-      providers: {
-        keycloak: {
-          clientId: process.env.NUXT_OAUTH_KEYCLOAK_CLIENT_ID,
-          clientSecret: process.env.NUXT_OAUTH_KEYCLOAK_CLIENT_SECRET,
-          authorizationUrl: `${process.env.NUXT_OAUTH_KEYCLOAK_SERVER_URL}/realms/${process.env.NUXT_OAUTH_KEYCLOAK_REALM}/protocol/openid-connect/auth`,
-          tokenUrl: `${process.env.NUXT_OAUTH_KEYCLOAK_SERVER_URL}/realms/${process.env.NUXT_OAUTH_KEYCLOAK_REALM}/protocol/openid-connect/token`,
-          userinfoUrl: `${process.env.NUXT_OAUTH_KEYCLOAK_SERVER_URL}/realms/${process.env.NUXT_OAUTH_KEYCLOAK_REALM}/protocol/openid-connect/userinfo`,
-          redirectUri: process.env.NUXT_OAUTH_KEYCLOAK_REDIRECT_URL || "http://localhost:3000/auth/keycloak/callback",
-          scope: ["openid", "profile", "email"],
-        },
-      },
-    },
     public: {
       apiBase: process.env.NUXT_PUBLIC_API_BASE || "http://localhost:5253/api/",
+      keycloakUrl: process.env.NUXT_OAUTH_KEYCLOAK_SERVER_URL,
+      keycloakRealm: process.env.NUXT_OAUTH_KEYCLOAK_REALM,
+      keycloakClientId: process.env.NUXT_OAUTH_KEYCLOAK_CLIENT_ID,
+      keycloakRedirectUrl: process.env.NUXT_OAUTH_KEYCLOAK_REDIRECT_URL,
+    },
+  },
+  
+  // nuxt-oidc-auth configuration
+  oidc: {
+    defaultProvider: "keycloak",
+    providers: {
+      keycloak: {
+        clientId: process.env.NUXT_OAUTH_KEYCLOAK_CLIENT_ID || "",
+        clientSecret: process.env.NUXT_OAUTH_KEYCLOAK_CLIENT_SECRET || "",
+        authorizationUrl: `${process.env.NUXT_OAUTH_KEYCLOAK_SERVER_URL || ""}/realms/${process.env.NUXT_OAUTH_KEYCLOAK_REALM || ""}/protocol/openid-connect/auth`,
+        tokenUrl: `${process.env.NUXT_OAUTH_KEYCLOAK_SERVER_URL || ""}/realms/${process.env.NUXT_OAUTH_KEYCLOAK_REALM || ""}/protocol/openid-connect/token`,
+        userinfoUrl: `${process.env.NUXT_OAUTH_KEYCLOAK_SERVER_URL || ""}/realms/${process.env.NUXT_OAUTH_KEYCLOAK_REALM || ""}/protocol/openid-connect/userinfo`,
+        redirectUri: process.env.NUXT_OAUTH_KEYCLOAK_REDIRECT_URL || "http://localhost:3000/auth/keycloak/callback",
+        scope: ["openid", "profile", "email"],
+      },
     },
   },
 

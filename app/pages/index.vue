@@ -54,8 +54,8 @@ onMounted(async () => {
 });
 
 async function handleLogin() {
-  // Use nuxt-oidc-auth login
-  await oidcLogin();
+  // Redirect to manual login route
+  await navigateTo("/auth/login", { external: true });
 }
 
 async function handleLogout() {
