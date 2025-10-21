@@ -42,7 +42,7 @@ definePageMeta({
   ssr: true,
 });
 
-const { loggedIn, user, fetch: fetchSession } = useUserSession();
+const { loggedIn, user, fetch: fetchSession } = useAuth();
 
 const isStartSelected = ref(false);
 const isLogoutSelected = ref(false);
@@ -52,11 +52,6 @@ const isOptionsSelected = ref(false);
 onMounted(async () => {
   await fetchSession();
 });
-
-// Watch for changes in user state
-watch(user, () => {});
-
-watch(loggedIn, () => {});
 
 async function handleLogin() {
   // Redirect to Keycloak OAuth login
