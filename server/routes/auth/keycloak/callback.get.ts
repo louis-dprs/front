@@ -45,18 +45,26 @@ export default defineEventHandler(async (event) => {
       Buffer.from(accessToken.split(".")[1], "base64").toString()
     );
 
-    // Use nuxt-oidc-auth session
-    const session = await useOidcSession(event);
+    // Use H3 session
+    const config = useRuntimeConfig(event);
+    const session = await useSession(event, {
+      password: config.sessionPassword,
+      name: "s",
+    });
+
     await session.update({
-      accessToken: tokens.access_token,
-      refreshToken: tokens.refresh_token,
-      expiresAt: Date.now() + tokens.expires_in * 1000,
       user: {
         id: payload.sub,
         email: payload.email,
         name: payload.name,
         username: payload.preferred_username,
       },
+      tokens: {
+        access: tokens.access_token,
+        refresh: tokens.refresh_token,
+        expiresAt: Date.now() + tokens.expires_in * 1000,
+      },
+      loggedInAt: Date.now(),
     });
 
     // Redirect to home page

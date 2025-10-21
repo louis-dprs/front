@@ -1,14 +1,52 @@
-// nuxt-oidc-auth composable wrapper
+import type { User } from "~/types/auth";
+
+// Simple auth composable with H3 sessions
 export const useAuth = () => {
-  const { loggedIn, user, session, fetch, clear, login, logout } = useOidcAuth();
+  const user = useState<User | null>("auth:user", () => null);
+  const loggedInAt = useState<number | null>("auth:loggedInAt", () => null);
+
+  const loggedIn = computed(() => !!user.value);
+
+  // Fetch user data from session API
+  const fetch = async () => {
+    try {
+      const data = await $fetch<{ user: User | null; loggedInAt: number | null }>(
+        "/api/auth/session"
+      );
+      user.value = data.user;
+      loggedInAt.value = data.loggedInAt;
+    } catch (error) {
+      console.error("Failed to fetch user session:", error);
+      user.value = null;
+      loggedInAt.value = null;
+    }
+  };
+
+  // Clear session
+  const clear = async () => {
+    user.value = null;
+    loggedInAt.value = null;
+  };
+
+  // Login redirect
+  const login = () => {
+    navigateTo("/auth/login");
+  };
+
+  // Logout
+  const logout = async () => {
+    await $fetch("/api/auth/logout");
+    user.value = null;
+    loggedInAt.value = null;
+  };
 
   return {
     user,
     loggedIn,
-    session,
+    loggedInAt,
     fetch,
     clear,
-    login: () => login("keycloak"),
+    login,
     logout,
   };
 };

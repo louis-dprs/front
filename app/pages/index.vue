@@ -42,7 +42,7 @@ definePageMeta({
   ssr: true,
 });
 
-const { loggedIn, user, fetch: fetchSession, login: oidcLogin, logout: oidcLogout } = useAuth();
+const { loggedIn, user, fetch: fetchSession, login, logout } = useAuth();
 
 const isStartSelected = ref(false);
 const isLogoutSelected = ref(false);
@@ -55,12 +55,12 @@ onMounted(async () => {
 
 async function handleLogin() {
   // Redirect to manual login route
-  await navigateTo("/auth/login", { external: true });
+  login();
 }
 
 async function handleLogout() {
-  // Use nuxt-oidc-auth logout
-  await oidcLogout();
+  // Use logout from composable
+  await logout();
 }
 
 function handleOptions() {

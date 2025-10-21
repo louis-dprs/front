@@ -1,40 +1,35 @@
 export default defineEventHandler(async (event) => {
-  // TEMPORAIREMENT DÉSACTIVÉ pour debug
-  // TODO: Réactiver une fois que nuxt-oidc-auth fonctionne
-  return;
+  // Tout le site est public par défaut
+  // Seules certaines pages nécessitent l'authentification
   
-  // Skip middleware for auth routes and public assets
   const path = event.path;
 
-  // Public routes that don't require authentication
-  const publicRoutes = [
-    "/", // Root path (Nuxt internal)
-    "/auth/", // Auth routes (without /dev prefix)
-    "/dev/auth/", // Auth routes
-    "/_nuxt/", // Nuxt assets
-    "/dev/_nuxt/", // Nuxt assets
-    "/api/", // API routes
-    "/dev/api/", // API routes
-    "/dev/", // Home page
-    "/dev", // Home page (without trailing slash)
-    "/dev/lore", // Lore page (public)
-    "/dev/bestiary", // Bestiary page (public)
-    "/resources/", // Public resources
+  // Routes qui nécessitent l'authentification
+  const protectedRoutes = [
+    "/dev/profile", // Page de profil (si tu en as une)
+    "/dev/settings", // Page de paramètres (si tu en as une)
+    // Ajoute ici d'autres routes qui nécessitent l'auth
   ];
 
-  // Check if the current path is public or contains error parameter
-  if (
-    publicRoutes.some((route) => path === route || path.startsWith(route)) ||
-    path.includes("error=")
-  ) {
+  // Vérifie si la route actuelle nécessite l'authentification
+  const requiresAuth = protectedRoutes.some(
+    (route) => path === route || path.startsWith(route + "/")
+  );
+
+  // Si la route ne nécessite pas d'auth, laisser passer
+  if (!requiresAuth) {
     return;
   }
 
-  // For all other routes, check if user is authenticated
-  const session = await useOidcSession(event);
+  // Pour les routes protégées, vérifier l'authentification
+  const config = useRuntimeConfig(event);
+  const session = await useSession(event, {
+    password: config.sessionPassword,
+    name: "s",
+  });
 
-  if (!session.user) {
-    // Redirect to home page if not authenticated
+  if (!session.data.user) {
+    // Rediriger vers la page d'accueil si pas authentifié
     return sendRedirect(event, "/dev/?error=unauthorized");
   }
 });

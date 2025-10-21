@@ -5,8 +5,7 @@ export default defineEventHandler(async (event) => {
     name: "s",
   });
 
-  return {
-    user: session.data.user || null,
-    loggedInAt: session.data.loggedInAt || null,
-  };
+  await session.clear();
+
+  return sendRedirect(event, "/dev/");
 });
