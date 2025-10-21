@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { randomBytes } from "node:crypto";
 import { storeSession } from "../../utils/token-store";
 
 export default defineOAuthKeycloakEventHandler({
@@ -7,8 +7,8 @@ export default defineOAuthKeycloakEventHandler({
     const expiresInSec = Number(tokens.expires_in || tokens.expiresIn || 0);
     const expiresAt = expiresInSec > 0 ? now + expiresInSec * 1000 : undefined;
 
-    // Generate a unique session ID
-    const sessionId = randomUUID();
+    // Generate a short unique session ID (16 bytes = 32 hex chars)
+    const sessionId = randomBytes(16).toString("hex");
 
     // Store EVERYTHING server-side (tokens + user info)
     storeSession(sessionId, {

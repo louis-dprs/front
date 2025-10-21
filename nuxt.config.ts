@@ -49,6 +49,7 @@ export default defineNuxtConfig({
 
   // Session configuration to handle large tokens
   session: {
+    name: "s", // Ultra short cookie name to save space
     maxAge: 60 * 60 * 24 * 7, // 7 days
     cookie: {
       sameSite: "lax",
