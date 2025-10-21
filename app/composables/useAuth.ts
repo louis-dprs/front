@@ -11,7 +11,7 @@ export const useAuth = () => {
   const fetch = async () => {
     try {
       const data = await $fetch<{ user: User | null; loggedInAt: number | null }>(
-        "/dev/api/auth/session"
+        "/dev/api/dev/auth/session"
       );
       user.value = data.user;
       loggedInAt.value = data.loggedInAt;
@@ -35,7 +35,7 @@ export const useAuth = () => {
 
   // Logout
   const logout = async () => {
-    await $fetch("/dev/api/auth/logout", { method: "POST" });
+    await $fetch("/dev/api/dev/auth/logout", { method: "POST" });
     user.value = null;
     loggedInAt.value = null;
   };
