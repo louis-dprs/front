@@ -8,9 +8,7 @@ export interface User {
 export interface UserSession {
   user: User;
   loggedInAt: number;
-  accessToken?: string;
-  refreshToken?: string;
-  expiresAt?: number; // epoch ms
+  sessionId?: string; // Reference to server-side token storage
 }
 
 declare module "#auth-utils" {
@@ -23,9 +21,7 @@ declare module "#auth-utils" {
 
   interface UserSession {
     loggedInAt?: number;
-    accessToken?: string;
-    refreshToken?: string;
-    expiresAt?: number;
+    sessionId?: string; // Reference to server-side token storage
   }
 }
 

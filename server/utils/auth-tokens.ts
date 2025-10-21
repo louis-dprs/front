@@ -1,11 +1,22 @@
 import type { H3Event } from "h3";
 import type { UserSession } from "#auth-utils";
+import { getTokens } from "./token-store";
 
 export function getSessionTokens(session: UserSession) {
+  const sessionId = session?.sessionId as string | undefined;
+  if (!sessionId) {
+    return {
+      accessToken: undefined,
+      refreshToken: undefined,
+      expiresAt: undefined,
+    };
+  }
+
+  const tokens = getTokens(sessionId);
   return {
-    accessToken: session?.accessToken as string | undefined,
-    refreshToken: session?.refreshToken as string | undefined,
-    expiresAt: session?.expiresAt as number | undefined,
+    accessToken: tokens?.accessToken,
+    refreshToken: tokens?.refreshToken,
+    expiresAt: tokens?.expiresAt,
   };
 }
 
@@ -68,13 +79,16 @@ export async function ensureValidAccessToken(event: H3Event) {
     const newExpiresAt =
       response.expires_in > 0 ? now + response.expires_in * 1000 : undefined;
 
-    // Update session with new tokens
-    await setUserSession(event, {
-      ...session,
-      accessToken: response.access_token,
-      refreshToken: response.refresh_token,
-      expiresAt: newExpiresAt,
-    });
+    // Update tokens in server-side store
+    const sessionId = session?.sessionId as string | undefined;
+    if (sessionId) {
+      const { updateTokens } = await import("./token-store");
+      updateTokens(sessionId, {
+        accessToken: response.access_token,
+        refreshToken: response.refresh_token,
+        expiresAt: newExpiresAt,
+      });
+    }
 
     return response.access_token;
   } catch {
