@@ -10,29 +10,25 @@ export default defineNuxtConfig({
     "@nuxt/image",
     "nuxt-auth-utils",
   ],
-
-  export default defineNuxtConfig({
-    modules: ['@sidebase/nuxt-auth'],
-    auth: {
-      strategies: {
-        keycloak: {
-          scheme: 'oauth',
-          endpoints: {
-            authorization: 'http://10.4.30.2:8040/keycloak/auth/realms/dungeoncrawler/protocol/openid-connect/auth',
-            token:         'http://10.4.30.2:8040/keycloak/auth/realms/dungeoncrawler/protocol/openid-connect/token',
-            userInfo:      'http://10.4.30.2:8040/keycloak/auth/realms/dungeoncrawler/protocol/openid-connect/userinfo',
-          },
-          clientId:   'dungeoncrawler',
-          scope:      ['openid', 'profile', 'email'],
-          redirectUri: 'http://10.4.30.2:8888/dev/auth/keycloak',
-          cookie: {
-            secure: false,
-            sameSite: 'lax',
-          },
+  auth: {
+    strategies: {
+      keycloak: {
+        scheme: 'oauth',
+        endpoints: {
+          authorization: 'http://10.4.30.2:8040/keycloak/auth/realms/dungeoncrawler/protocol/openid-connect/auth',
+          token:         'http://10.4.30.2:8040/keycloak/auth/realms/dungeoncrawler/protocol/openid-connect/token',
+          userInfo:      'http://10.4.30.2:8040/keycloak/auth/realms/dungeoncrawler/protocol/openid-connect/userinfo',
+        },
+        clientId:   'dungeoncrawler',
+        scope:      ['openid', 'profile', 'email'],
+        redirectUri: 'http://10.4.30.2:8888/dev/auth/keycloak',
+        cookie: {
+          secure: false,
+          sameSite: 'lax',
         },
       },
     },
-  })
+  },
 
   // Application settings
   app: {
