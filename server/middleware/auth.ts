@@ -1,4 +1,8 @@
 export default defineEventHandler(async (event) => {
+  // TEMPORAIREMENT DÉSACTIVÉ pour debug
+  // TODO: Réactiver une fois que nuxt-oidc-auth fonctionne
+  return;
+  
   // Skip middleware for auth routes and public assets
   const path = event.path;
 
