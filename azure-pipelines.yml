@@ -1,0 +1,89 @@
+# Node.js with Vue
+# Build a Node.js project that uses Vue.
+# Add steps that analyze code, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
+
+trigger:
+  branches:
+    include:
+      - dev
+
+pool:
+  name: "HarborPool"
+
+variables:
+  NODE_VERSION: "24" # Node.js version
+
+stages:
+  - stage: CI
+    displayName: "DungeonCrawler"
+    jobs:
+      - job: lint_and_test
+        displayName: "Lint + Unit Tests + SonarCloud"
+        steps:
+          - task: NodeTool@0
+            inputs:
+              versionSpec: "$(NODE_VERSION)"
+            displayName: "Use Node.js $(NODE_VERSION)"
+
+          - script: |
+              npm ci
+            displayName: "Install dependencies"
+
+          - task: Cache@2
+            inputs:
+              key: 'npm | "$(Agent.OS)" | package-lock.json'
+              path: $(Pipeline.Workspace)/.npm
+            displayName: "Cache npm dependencies"
+
+          - script: |
+              npm run lint
+            displayName: "Lint the code"
+
+          #- script: |
+          #    npm run test:unit -- --coverage
+          #  displayName: 'Run unit tests with coverage'
+
+          - task: SonarCloudPrepare@3
+            inputs:
+              SonarCloud: "SonarCloudServiceEndpoint" # ✅ bien mettre SonarCloud
+              organization: "diiage2026p1g1"
+              scannerMode: "Other" # ✅ projet Node/Vue → Other
+              projectKey: "DIIAGE2026P1G1_D3G1-P1P2-DungeonCrawler"
+              projectName: "D3G1-P1P2-DungeonCrawler"
+              extraProperties: |
+                sonar.sources=.
+                sonar.tests=.
+                sonar.test.inclusions=**/*.spec.js,**/*.test.js
+                sonar.javascript.lcov.reportPaths=coverage/lcov.info
+
+          - task: SonarCloudAnalyze@3
+
+          - task: SonarCloudPublish@3
+            inputs:
+              pollingTimeoutSec: "300"
+
+          # Build & Push vers Harbor
+          - task: Docker@2
+            displayName: Build and Push Docker image
+            inputs:
+              command: buildAndPush
+              repository: dungeoncrawler/front-dev
+              dockerfile: Dockerfile
+              containerRegistry: Harbor # ton service connection Harbor
+              tags: |
+                $(Build.BuildId)
+                latest
+
+          # Signature de l'image avec Cosign
+          - task: Bash@3
+            displayName: "Sign container image"
+            inputs:
+              targetType: "inline"
+              script: |
+                # Signer l'image
+                export COSIGN_PASSWORD=$(COSIGN_PASSWORD)
+                cosign sign --yes --key /opt/cosign.key repository.groupe1.local:80/dungeoncrawler/front-dev:latest
+            env:
+              COSIGN_PRIVATE_KEY: $(COSIGN_PRIVATE_KEY)
+              COSIGN_PASSWORD: $(COSIGN_PASSWORD)

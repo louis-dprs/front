@@ -1,0 +1,18 @@
+export interface Creature {
+  id: string;
+  rank: string;
+  stats: {
+    strength: number;
+    stamina: number;
+    intelligence: number;
+    agility: number;
+    hp: number;
+  };
+  iconKey: string;
+  version: number;
+  publishedAt: string;
+  locale: string;
+  name: string;
+  shortDesc: string;
+  lore: string;
+}
