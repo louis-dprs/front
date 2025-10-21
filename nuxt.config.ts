@@ -8,7 +8,20 @@ export default defineNuxtConfig({
     "@nuxtjs/tailwindcss",
     "shadcn-nuxt",
     "@nuxt/image",
+    "nuxt-oidc-auth",
   ],
+  oidc: {
+    default: {
+      clientId: process.env.NUXT_OAUTH_KEYCLOAK_CLIENT_ID,
+      issuer: `${process.env.NUXT_OAUTH_KEYCLOAK_SERVER_URL}/realms/${process.env.NUXT_OAUTH_KEYCLOAK_REALM}`,
+      redirectUri: process.env.NUXT_OAUTH_KEYCLOAK_REDIRECT_URL,
+      responseType: "code",
+      scope: "openid profile email",
+      storage: "cookie",
+      autoLogin: false,
+      logoutRedirectUri: process.env.NUXT_OAUTH_KEYCLOAK_REDIRECT_URL,
+    },
+  },
 
   // Application settings
   app: {

@@ -3,7 +3,7 @@
     <div class="flex flex-col gap-4">
       <!-- Show login button if not authenticated -->
       <MenuButton
-        v-if="!user"
+        v-if="!loggedIn"
         v-model="isStartSelected"
         class="w-72 h-24 text-2xl"
         @click="handleLogin"
@@ -13,19 +13,19 @@
 
       <!-- Show logout button if authenticated -->
       <MenuButton
-        v-if="user"
+        v-if="loggedIn"
         v-model="isLogoutSelected"
         class="w-72 h-24 text-2xl"
         @click="handleLogout"
       >
-        Logout ({{ user.username || user.name }})
+        Logout ({{ user?.username || user?.name }})
       </MenuButton>
 
       <!-- Show enter dungeon button if authenticated -->
       <MenuButton
         v-model="isOptionsSelected"
         class="w-72 h-24 text-2xl"
-        :disabled="!user"
+        :disabled="!loggedIn"
         @click="handleOptions"
       >
         Enter the dungeon
@@ -42,29 +42,22 @@ definePageMeta({
   ssr: true,
 });
 
-const { loggedIn, user, fetch: fetchSession, login, logout } = useAuth();
+const { loggedIn, user, login, logout } = useAuth();
 
 const isStartSelected = ref(false);
 const isLogoutSelected = ref(false);
 const isOptionsSelected = ref(false);
 
-// Fetch session on mount
-onMounted(async () => {
-  await fetchSession();
-});
-
-async function handleLogin() {
-  // Redirect to manual login route
+function handleLogin() {
   login();
 }
 
-async function handleLogout() {
-  // Use logout from composable
-  await logout();
+function handleLogout() {
+  logout();
 }
 
 function handleOptions() {
-  if (user.value) {
+  if (loggedIn) {
     navigateTo("/bestiary");
   }
 }
