@@ -49,12 +49,23 @@ export default defineNuxtConfig({
 
   // Session configuration to handle large tokens
   session: {
-    name: "s", // Ultra short cookie name to save space
-    maxAge: 60 * 60 * 24 * 7, // 7 days
+    name: "s",
+    maxAge: 60 * 60 * 24 * 7,
     cookie: {
       sameSite: "lax",
-      secure: false, // Disabled for HTTP connections (not recommended for production)
-      maxSize: 8192, // Increase cookie size limit to 8KB (double the default)
+      secure: false,
+      maxSize: 8192,
+      httpOnly: true, // Protège contre XSS
+      path: "/dev", // Limite le scope du cookie
+    },
+  },
+  
+  // Si vous utilisez nuxt-auth / sidebase
+  auth: {
+    globalAppMiddleware: true,
+    session: {
+      enableRefreshOnWindowFocus: true,
+      enableRefreshPeriodically: false,
     },
   },
 
