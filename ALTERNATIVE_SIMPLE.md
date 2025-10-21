@@ -95,7 +95,7 @@ export default defineEventHandler(async (event) => {
 })
 ```
 
-### 2. server/api/auth/session-simple.get.ts
+### 2. server/api/auth/session-simple.get.ts 
 
 ```typescript
 import { useSession } from 'h3'
