@@ -1,38 +1,68 @@
 /**
- * Simple in-memory token store
+ * Simple in-memory session store
  * For production, use Redis or a database
  */
 
-interface TokenData {
+export interface TokenData {
   accessToken: string;
   refreshToken: string;
   expiresAt?: number;
 }
 
-const tokenStore = new Map<string, TokenData>();
+export interface UserData {
+  keycloakId: string;
+  email: string;
+  name: string;
+  username: string;
+}
+
+export interface SessionData {
+  tokens: TokenData;
+  user: UserData;
+  loggedInAt: number;
+}
+
+const sessionStore = new Map<string, SessionData>();
 
 export function storeTokens(sessionId: string, tokens: TokenData) {
-  tokenStore.set(sessionId, tokens);
+  const existing = sessionStore.get(sessionId);
+  if (existing) {
+    existing.tokens = tokens;
+    sessionStore.set(sessionId, existing);
+  }
+}
+
+export function storeSession(sessionId: string, data: SessionData) {
+  sessionStore.set(sessionId, data);
+}
+
+export function getSession(sessionId: string): SessionData | undefined {
+  return sessionStore.get(sessionId);
 }
 
 export function getTokens(sessionId: string): TokenData | undefined {
-  return tokenStore.get(sessionId);
+  return sessionStore.get(sessionId)?.tokens;
+}
+
+export function getUser(sessionId: string): UserData | undefined {
+  return sessionStore.get(sessionId)?.user;
 }
 
 export function removeTokens(sessionId: string) {
-  tokenStore.delete(sessionId);
+  sessionStore.delete(sessionId);
 }
 
 export function updateTokens(
   sessionId: string,
   updates: Partial<TokenData>
 ): boolean {
-  const existing = tokenStore.get(sessionId);
+  const existing = sessionStore.get(sessionId);
   if (!existing) return false;
 
-  tokenStore.set(sessionId, {
-    ...existing,
+  existing.tokens = {
+    ...existing.tokens,
     ...updates,
-  });
+  };
+  sessionStore.set(sessionId, existing);
   return true;
 }

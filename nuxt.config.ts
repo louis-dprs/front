@@ -47,11 +47,6 @@ export default defineNuxtConfig({
     componentDir: "./app/components/ui",
   },
 
-  // Session configuration to handle large tokens
-  session: {
-    maxAge: 60 * 60 * 24 * 7, // 7 days
-  },
-
   // Compatibility
   compatibilityDate: "2025-07-15",
 

@@ -8,7 +8,7 @@ export interface User {
 export interface UserSession {
   user: User;
   loggedInAt: number;
-  sessionId?: string; // Reference to server-side token storage
+  sid?: string; // Session ID - Reference to server-side session storage
 }
 
 declare module "#auth-utils" {
@@ -20,8 +20,7 @@ declare module "#auth-utils" {
   }
 
   interface UserSession {
-    loggedInAt?: number;
-    sessionId?: string; // Reference to server-side token storage
+    sid?: string; // Session ID - Only this is stored in the cookie
   }
 }
 

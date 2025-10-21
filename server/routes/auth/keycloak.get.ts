@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { storeTokens } from "../../utils/token-store";
+import { storeSession } from "../../utils/token-store";
 
 export default defineOAuthKeycloakEventHandler({
   async onSuccess(event, { user, tokens }) {
@@ -10,15 +10,13 @@ export default defineOAuthKeycloakEventHandler({
     // Generate a unique session ID
     const sessionId = randomUUID();
 
-    // Store tokens server-side (not in cookie)
-    storeTokens(sessionId, {
-      accessToken: tokens.access_token,
-      refreshToken: tokens.refresh_token,
-      expiresAt,
-    });
-
-    // Only store minimal user info and session ID in cookie
-    await setUserSession(event, {
+    // Store EVERYTHING server-side (tokens + user info)
+    storeSession(sessionId, {
+      tokens: {
+        accessToken: tokens.access_token,
+        refreshToken: tokens.refresh_token,
+        expiresAt,
+      },
       user: {
         keycloakId: user.sub,
         email: user.email,
@@ -26,7 +24,11 @@ export default defineOAuthKeycloakEventHandler({
         username: user.preferred_username,
       },
       loggedInAt: now,
-      sessionId, // Only store the session ID, not the tokens
+    });
+
+    // ONLY store the session ID in the cookie - nothing else
+    await setUserSession(event, {
+      sid: sessionId, // Only the session ID - ultra minimal
     });
     return sendRedirect(event, "/dev/");
   },

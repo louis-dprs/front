@@ -3,7 +3,7 @@ import type { UserSession } from "#auth-utils";
 import { getTokens } from "./token-store";
 
 export function getSessionTokens(session: UserSession) {
-  const sessionId = session?.sessionId as string | undefined;
+  const sessionId = session?.sid as string | undefined;
   if (!sessionId) {
     return {
       accessToken: undefined,
@@ -80,7 +80,7 @@ export async function ensureValidAccessToken(event: H3Event) {
       response.expires_in > 0 ? now + response.expires_in * 1000 : undefined;
 
     // Update tokens in server-side store
-    const sessionId = session?.sessionId as string | undefined;
+    const sessionId = session?.sid as string | undefined;
     if (sessionId) {
       const { updateTokens } = await import("./token-store");
       updateTokens(sessionId, {

@@ -2,25 +2,34 @@
 
 ## Problème identifié
 
-L'erreur `Set-Cookie header was blocked because the cookie was too large` se produit car les tokens JWT de Keycloak (accessToken et refreshToken) sont stockés directement dans le cookie de session.
+L'erreur `Set-Cookie header was blocked because the cookie was too large` se produit car :
+1. Les tokens JWT de Keycloak (accessToken et refreshToken) étaient stockés dans le cookie
+2. Même après avoir déplacé les tokens, les infos utilisateur rendaient le cookie trop gros après chiffrement Iron
 
 **Limite des cookies** : 4096 caractères maximum
 **Taille des tokens JWT Keycloak** : Souvent > 4000 caractères
+**Cookie Iron-sealed** : Même un petit objet devient gros après chiffrement
 
-## Solution implémentée
+## Solution implémentée (V2 - Ultra minimale)
 
-Au lieu de stocker les tokens dans le cookie, nous utilisons maintenant un **stockage côté serveur** :
+Nous stockons **TOUT côté serveur** et ne mettons **QUE le session ID** dans le cookie :
 
 ### Architecture
 
 ```
-Cookie (petit) ────> sessionId (UUID)
-                           │
-                           ▼
-                    Token Store (serveur)
-                    ├─ accessToken
-                    ├─ refreshToken
-                    └─ expiresAt
+Cookie (ultra-léger) ────> sid: "uuid" (36 chars seulement)
+                                 │
+                                 ▼
+                          Session Store (serveur)
+                          ├─ tokens
+                          │  ├─ accessToken
+                          │  ├─ refreshToken
+                          │  └─ expiresAt
+                          └─ user
+                             ├─ keycloakId
+                             ├─ email
+                             ├─ name
+                             └─ username
 ```
 
 ### Fichiers modifiés
