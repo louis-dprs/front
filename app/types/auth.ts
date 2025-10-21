@@ -5,23 +5,12 @@ export interface User {
   username: string;
 }
 
-declare module "#auth-utils" {
-  interface User {
-    id: string;
-    email: string;
-    name: string;
-    username: string;
-  }
-
-  interface UserSession {
-    user?: User;
-    loggedInAt?: number;
-    secure?: {
-      accessToken: string;
-      refreshToken: string;
-      expiresAt?: number;
-    };
-  }
+export interface SessionData {
+  user: User;
+  tokens: {
+    access: string;
+    refresh: string;
+    expiresAt?: number;
+  };
+  loggedInAt: number;
 }
-
-export {};

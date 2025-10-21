@@ -1,17 +1,23 @@
 import type { H3Event } from "h3";
-import type { UserSession } from "#auth-utils";
+import { useSession } from "h3";
 
-export function getSessionTokens(session: UserSession) {
-  const secure = session?.secure as { 
-    accessToken?: string; 
-    refreshToken?: string; 
-    expiresAt?: number 
+export async function getSessionTokens(event: H3Event) {
+  const config = useRuntimeConfig(event);
+  const session = await useSession(event, {
+    password: config.sessionPassword,
+    name: "s",
+  });
+
+  const tokens = session.data.tokens as {
+    access?: string;
+    refresh?: string;
+    expiresAt?: number;
   } | undefined;
-  
+
   return {
-    accessToken: secure?.accessToken,
-    refreshToken: secure?.refreshToken,
-    expiresAt: secure?.expiresAt,
+    accessToken: tokens?.access,
+    refreshToken: tokens?.refresh,
+    expiresAt: tokens?.expiresAt,
   };
 }
 
@@ -21,8 +27,7 @@ export function isTokenExpiringSoon(expiresAt?: number, skewMs = 30_000) {
 }
 
 export async function ensureValidAccessToken(event: H3Event) {
-  const session = await getUserSession(event);
-  const { accessToken, refreshToken, expiresAt } = getSessionTokens(session);
+  const { accessToken, refreshToken, expiresAt } = await getSessionTokens(event);
 
   // If no token at all, return null (caller decides what to do)
   if (!accessToken) return null;
@@ -57,11 +62,7 @@ export async function ensureValidAccessToken(event: H3Event) {
       client_id: clientId,
     });
 
-    const response = await $fetch<{
-      access_token: string;
-      refresh_token: string;
-      expires_in: number;
-    }>(tokenEndpoint, {
+    const response = await fetch(tokenEndpoint, {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -69,22 +70,37 @@ export async function ensureValidAccessToken(event: H3Event) {
       body: body.toString(),
     });
 
+    if (!response.ok) {
+      throw new Error("Token refresh failed");
+    }
+
+    const data = await response.json() as {
+      access_token: string;
+      refresh_token: string;
+      expires_in: number;
+    };
+
     // Calculate new expiration
     const now = Date.now();
     const newExpiresAt =
-      response.expires_in > 0 ? now + response.expires_in * 1000 : undefined;
+      data.expires_in > 0 ? now + data.expires_in * 1000 : undefined;
 
     // Update session with new tokens
-    await setUserSession(event, {
-      ...session,
-      secure: {
-        accessToken: response.access_token,
-        refreshToken: response.refresh_token,
+    const session = await useSession(event, {
+      password: config.sessionPassword,
+      name: "s",
+    });
+
+    await session.update({
+      ...session.data,
+      tokens: {
+        access: data.access_token,
+        refresh: data.refresh_token,
         expiresAt: newExpiresAt,
       },
     });
 
-    return response.access_token;
+    return data.access_token;
   } catch {
     // Refresh failed (token expired, revoked, or network issue)
     // Return null to signal that authentication is required

@@ -55,7 +55,7 @@ onMounted(async () => {
 
 async function handleLogin() {
   // Redirect to Keycloak OAuth login
-  await navigateTo("/auth/keycloak", { external: true });
+  await navigateTo("/auth/login", { external: true });
 }
 
 async function handleLogout() {

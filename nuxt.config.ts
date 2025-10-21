@@ -8,7 +8,6 @@ export default defineNuxtConfig({
     "@nuxtjs/tailwindcss",
     "shadcn-nuxt",
     "@nuxt/image",
-    "nuxt-auth-utils",
   ],
 
   // Application settings
@@ -26,8 +25,22 @@ export default defineNuxtConfig({
 
   // Runtime configuration
   runtimeConfig: {
+    sessionPassword: process.env.NUXT_SESSION_PASSWORD || "change-me-in-production-min-32-chars",
+    oauth: {
+      keycloak: {
+        serverUrl: process.env.NUXT_OAUTH_KEYCLOAK_SERVER_URL,
+        realm: process.env.NUXT_OAUTH_KEYCLOAK_REALM,
+        clientId: process.env.NUXT_OAUTH_KEYCLOAK_CLIENT_ID,
+        clientSecret: process.env.NUXT_OAUTH_KEYCLOAK_CLIENT_SECRET,
+        redirectUrl: process.env.NUXT_OAUTH_KEYCLOAK_REDIRECT_URL,
+      },
+    },
     public: {
       apiBase: process.env.NUXT_PUBLIC_API_BASE || "http://localhost:5253/api/",
+      keycloakUrl: process.env.NUXT_OAUTH_KEYCLOAK_SERVER_URL,
+      keycloakRealm: process.env.NUXT_OAUTH_KEYCLOAK_REALM,
+      keycloakClientId: process.env.NUXT_OAUTH_KEYCLOAK_CLIENT_ID,
+      keycloakRedirectUrl: process.env.NUXT_OAUTH_KEYCLOAK_REDIRECT_URL,
     },
   },
 
@@ -47,18 +60,7 @@ export default defineNuxtConfig({
     componentDir: "./app/components/ui",
   },
 
-  // Session configuration to handle large tokens
-  session: {
-    name: "s",
-    maxAge: 60 * 60 * 24 * 7,
-    cookie: {
-      sameSite: "lax",
-      secure: false, // FORCE to false for HTTP
-      maxSize: 8192,
-      httpOnly: true,
-      path: "/",
-    },
-  },
+
 
   // Compatibility
   compatibilityDate: "2025-07-15",

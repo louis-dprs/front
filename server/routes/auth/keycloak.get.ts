@@ -1,30 +1,74 @@
-export default defineOAuthKeycloakEventHandler({
-  async onSuccess(event, { user, tokens }) {
-    const now = Date.now();
-    const expiresInSec = Number(tokens.expires_in || tokens.expiresIn || 0);
-    const expiresAt = expiresInSec > 0 ? now + expiresInSec * 1000 : undefined;
+import { useSession } from "h3";
 
-    // Store minimal user data in session (no tokens in cookie)
-    await setUserSession(event, {
-      user: {
-        id: user.sub,
-        email: user.email,
-        name: user.name || user.preferred_username,
-        username: user.preferred_username,
-      },
-      loggedInAt: now,
-      // Store token metadata only (not the actual tokens)
-      secure: {
-        accessToken: tokens.access_token,
-        refreshToken: tokens.refresh_token,
-        expiresAt,
+export default defineEventHandler(async (event) => {
+  const query = getQuery(event);
+  const code = query.code as string;
+
+  if (!code) {
+    return sendRedirect(event, "/dev/?error=no_code");
+  }
+
+  try {
+    const config = useRuntimeConfig(event);
+    const tokenEndpoint = `${config.oauth.keycloak.serverUrl}/realms/${config.oauth.keycloak.realm}/protocol/openid-connect/token`;
+
+    // Exchange code for tokens
+    const body = new URLSearchParams({
+      grant_type: "authorization_code",
+      code,
+      client_id: config.oauth.keycloak.clientId,
+      redirect_uri: config.oauth.keycloak.redirectUrl,
+    });
+
+    if (config.oauth.keycloak.clientSecret) {
+      body.append("client_secret", config.oauth.keycloak.clientSecret);
+    }
+
+    const tokenResponse = await $fetch<{
+      access_token: string;
+      refresh_token: string;
+      expires_in: number;
+    }>(tokenEndpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: body.toString(),
+    });
+
+    // Decode JWT to get user info
+    const payload = JSON.parse(
+      Buffer.from(tokenResponse.access_token.split(".")[1], "base64").toString()
+    );
+
+    // Store in H3 session
+    const session = await useSession(event, {
+      password: config.sessionPassword,
+      name: "s",
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+      cookie: {
+        sameSite: "lax",
+        secure: false,
+        httpOnly: true,
       },
     });
-    
+
+    await session.update({
+      user: {
+        id: payload.sub,
+        email: payload.email,
+        name: payload.name || payload.preferred_username,
+        username: payload.preferred_username,
+      },
+      tokens: {
+        access: tokenResponse.access_token,
+        refresh: tokenResponse.refresh_token,
+        expiresAt: Date.now() + tokenResponse.expires_in * 1000,
+      },
+      loggedInAt: Date.now(),
+    });
+
     return sendRedirect(event, "/dev/");
-  },
-  
-  onError(event, _error) {
+  } catch (error) {
+    console.error("Keycloak auth error:", error);
     return sendRedirect(event, "/dev/?error=auth_failed");
-  },
+  }
 });

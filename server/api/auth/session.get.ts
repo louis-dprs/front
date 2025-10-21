@@ -1,8 +1,15 @@
+import { useSession } from "h3";
+
 export default defineEventHandler(async (event) => {
-  const session = await getUserSession(event);
+  const config = useRuntimeConfig(event);
   
+  const session = await useSession(event, {
+    password: config.sessionPassword,
+    name: "s",
+  });
+
   return {
-    user: session.user || null,
-    loggedInAt: session.loggedInAt || null,
+    user: session.data.user || null,
+    loggedInAt: session.data.loggedInAt || null,
   };
 });

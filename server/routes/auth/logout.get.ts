@@ -1,4 +1,13 @@
+import { useSession } from "h3";
+
 export default defineEventHandler(async (event) => {
-  await clearUserSession(event);
+  const config = useRuntimeConfig(event);
+  
+  const session = await useSession(event, {
+    password: config.sessionPassword,
+    name: "s",
+  });
+
+  await session.clear();
   return sendRedirect(event, "/dev/");
 });
