@@ -1,6 +1,5 @@
 
 // Composable basé sur nuxt-oidc-auth
-import { useOidcAuth } from 'nuxt-oidc-auth';
 
 export const useAuth = () => {
   const { login, logout, isAuthenticated, user, loading, error } = useOidcAuth();
