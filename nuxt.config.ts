@@ -54,6 +54,7 @@ export default defineNuxtConfig({
     cookie: {
       sameSite: "lax",
       secure: false, // Disabled for HTTP connections (not recommended for production)
+      maxSize: 8192, // Increase cookie size limit to 8KB (double the default)
     },
   },
 
