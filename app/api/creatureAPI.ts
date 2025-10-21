@@ -5,9 +5,15 @@ export async function getCreaturesLocalized(
   locale: string
 ): Promise<Creature[]> {
   try {
-    // Use the server proxy so the access token is injected automatically
-    const res = await $fetch(`/api/proxy/creatures/localized`, {
+    const config = useRuntimeConfig();
+    const { accessToken } = await useOidcAuth();
+    
+    // Direct call to backend with token
+    const res = await $fetch(`${config.public.apiBase}/creatures/localized`, {
       params: { locale },
+      headers: accessToken ? {
+        Authorization: `Bearer ${accessToken}`
+      } : {}
     });
     return res as Creature[];
   } catch {

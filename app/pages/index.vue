@@ -42,7 +42,7 @@ definePageMeta({
   ssr: true,
 });
 
-const { loggedIn, user, fetch: fetchSession } = useAuth();
+const { loggedIn, user, fetch: fetchSession, login: oidcLogin, logout: oidcLogout } = useAuth();
 
 const isStartSelected = ref(false);
 const isLogoutSelected = ref(false);
@@ -54,13 +54,13 @@ onMounted(async () => {
 });
 
 async function handleLogin() {
-  // Redirect to Keycloak OAuth login
-  await navigateTo("/auth/login", { external: true });
+  // Use nuxt-oidc-auth login
+  await oidcLogin();
 }
 
 async function handleLogout() {
-  // Redirect to logout route
-  await navigateTo("/auth/logout", { external: true });
+  // Use nuxt-oidc-auth logout
+  await oidcLogout();
 }
 
 function handleOptions() {
