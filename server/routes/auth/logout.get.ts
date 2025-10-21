@@ -1,4 +1,4 @@
-import { removeTokens } from "~/server/utils/token-store";
+import { removeTokens } from "../../utils/token-store";
 
 export default defineEventHandler(async (event) => {
   // Get session before clearing to remove tokens

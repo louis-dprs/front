@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { storeTokens } from "~/server/utils/token-store";
+import { storeTokens } from "../../utils/token-store";
 
 export default defineOAuthKeycloakEventHandler({
   async onSuccess(event, { user, tokens }) {
