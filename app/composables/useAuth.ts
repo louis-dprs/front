@@ -30,7 +30,7 @@ export const useAuth = () => {
 
   // Login redirect
   const login = () => {
-    navigateTo("/auth/login");
+    navigateTo("/auth/login", { external: true });
   };
 
   // Logout
