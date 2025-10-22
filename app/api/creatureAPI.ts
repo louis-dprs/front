@@ -6,7 +6,7 @@ export async function getCreaturesLocalized(
 ): Promise<Creature[]> {
   try {
     const config = useRuntimeConfig();
-    const { accessToken } = await useOidcAuth();
+    const accessToken = await useAccessToken();
     
     // Direct call to backend with token
     const res = await $fetch(`${config.public.apiBase}/creatures/localized`, {

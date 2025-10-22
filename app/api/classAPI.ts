@@ -4,7 +4,7 @@ import { mockClasses } from "~/mocks/classMock";
 export async function getClassesLocalized(locale: string): Promise<Class[]> {
   try {
     const config = useRuntimeConfig();
-    const { accessToken } = await useOidcAuth();
+    const accessToken = await useAccessToken();
     
     // Direct call to backend with token
     const res = await $fetch(`${config.public.apiBase}/classes/localized`, {

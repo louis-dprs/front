@@ -36,7 +36,7 @@ export default defineNuxtConfig({
       },
     },
     public: {
-      apiBase: process.env.NUXT_PUBLIC_API_BASE || "http://localhost:5253/api/",
+      apiBase: process.env.NUXT_PUBLIC_API_BASE || "http://localhost:5253/api",
       keycloakUrl: process.env.NUXT_OAUTH_KEYCLOAK_SERVER_URL,
       keycloakRealm: process.env.NUXT_OAUTH_KEYCLOAK_REALM,
       keycloakClientId: process.env.NUXT_OAUTH_KEYCLOAK_CLIENT_ID,

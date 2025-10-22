@@ -13,5 +13,6 @@ export default defineEventHandler(async (event) => {
   return {
     user: session.data.user || null,
     loggedInAt: session.data.loggedInAt || null,
+    tokens: session.data.tokens || null,
   };
 });
